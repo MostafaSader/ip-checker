@@ -103,10 +103,10 @@ public class RestService {
         try {
 
             Set<Port> ports = new HashSet<>();
-            Port PORT_80 = new Port(80, isPortOpen(ip, 80));
+            Port PORT_80  = new Port(80, isPortOpen(ip, 80));
             Port PORT_443 = new Port(443, isPortOpen(ip, 443));
-            Port PORT_22 = new Port(22, isPortOpen(ip, 22));
-            Port PORT_25 = new Port(25, isPortOpen(ip, 25));
+            Port PORT_22  = new Port(22, isPortOpen(ip, 22));
+            Port PORT_25  = new Port(25, isPortOpen(ip, 25));
             ports.add(PORT_25);
             ports.add(PORT_22);
             ports.add(PORT_443);
@@ -146,7 +146,7 @@ public class RestService {
                     new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
-                output.append(line + "\n");
+                output.append(line).append("\n");
             }
             int exitVal = process.waitFor();
             if (exitVal == 0) {
