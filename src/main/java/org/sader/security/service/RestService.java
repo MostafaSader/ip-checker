@@ -31,19 +31,20 @@ public class RestService {
     boolean iranAccess = false;
 
     @PostConstruct
-    public void ban(){
+    public void ban() {
         try {
             Scanner scanner = new Scanner(new File("/home/mostafa/MyOwn/university/security/src/main/resources/static/iran_ip.txt"));
             runCommand("ipset create iranA nethash");
-            while (scanner.hasNextLine()){
+            while (scanner.hasNextLine()) {
                 String ip = scanner.nextLine();
                 runCommand("ipset add iranA " + ip);
             }
             System.out.println("done");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     public boolean openSSHForIp(String ip) {
         String command = String.format(passwordEchoText + " ufw allow from %s to any port 22", ip);
         System.out.println(command);
@@ -82,17 +83,16 @@ public class RestService {
             RestTemplate restTemplate = new RestTemplateBuilder().setConnectTimeout(Duration.ofSeconds(2)).build();
             String name = "www" + url.split("www")[1];
             String o = runCommand("nslookup " + name);
-            Scanner scanner = new Scanner(o.replace("\t",""));
-            while (!scanner.nextLine().startsWith("Name:"));
+            Scanner scanner = new Scanner(o.replace("\t", ""));
+            while (!scanner.nextLine().startsWith("Name:")) ;
             String addr = scanner.nextLine().split(" ")[1];
             list.add("Filtering status : " + addr.startsWith("10."));
             ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
             list.add("Availability status : " + (result.getStatusCode() == HttpStatus.valueOf(200)));
             return list;
-        }catch (ResourceAccessException e){
+        } catch (ResourceAccessException e) {
             list.add("Availability status : " + false);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -104,9 +104,9 @@ public class RestService {
 
             Set<Port> ports = new HashSet<>();
             Port PORT_80 = new Port(80, isPortOpen(ip, 80));
-            Port PORT_443 = new Port(443,  isPortOpen(ip, 443));
-            Port PORT_22 = new Port(22,  isPortOpen(ip, 22));
-            Port PORT_25 = new Port(25,  isPortOpen(ip, 25));
+            Port PORT_443 = new Port(443, isPortOpen(ip, 443));
+            Port PORT_22 = new Port(22, isPortOpen(ip, 22));
+            Port PORT_25 = new Port(25, isPortOpen(ip, 25));
             ports.add(PORT_25);
             ports.add(PORT_22);
             ports.add(PORT_443);
@@ -160,17 +160,16 @@ public class RestService {
     }
 
 
-
     public boolean toggleIranAccess() {
         try {
             iranAccess = !iranAccess;
             if (iranAccess) {
                 runCommand("iptables -A INPUT -m set --match-set iranA src -j ACCEPT");
                 runCommand("iptables -P INPUT DROP");
-            }else {
+            } else {
                 runCommand("iptables -P INPUT ACCEPT");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return iranAccess;
