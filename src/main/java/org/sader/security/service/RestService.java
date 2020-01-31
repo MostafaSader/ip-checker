@@ -4,16 +4,22 @@ package org.sader.security.service;
 import jdk.nashorn.internal.parser.JSONParser;
 import org.json.JSONObject;
 import org.sader.security.model.Port;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import sun.net.spi.nameservice.dns.DNSNameService;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
+import java.net.URI;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -69,14 +75,28 @@ public class RestService {
         }
     }
 
-    public boolean checkURL(String url) {
+    public List<String> checkURL(String url) {
+        List<String> list = new ArrayList<>();
+
         try {
-            RestTemplate restTemplate = new RestTemplate();
+            RestTemplate restTemplate = new RestTemplateBuilder().setConnectTimeout(Duration.ofSeconds(2)).build();
+            String name = "www" + url.split("www")[1];
+            String o = runCommand("nslookup " + name);
+            Scanner scanner = new Scanner(o.replace("\t",""));
+            while (!scanner.nextLine().startsWith("Name:"));
+            String addr = scanner.nextLine().split(" ")[1];
+            list.add("Filtering status : " + addr.startsWith("10."));
             ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
-            return result.getStatusCode() == HttpStatus.valueOf(200);
-        } catch (Exception e) {
-            return false;
+            list.add("Availability status : " + (result.getStatusCode() == HttpStatus.valueOf(200)));
+            return list;
+        }catch (ResourceAccessException e){
+            list.add("Availability status : " + false);
         }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return list;
     }
 
     public Set<Port> checkPorts(String ip) {

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -46,7 +47,7 @@ public class RestAPI {
 
 
     @GetMapping("/checkAvailability")
-    public ServiceResponse<Boolean> checkAvailability(@RequestParam String url, HttpServletRequest request, HttpServletResponse response) {
+    public ServiceResponse<List<String >> checkAvailability(@RequestParam String url, HttpServletRequest request, HttpServletResponse response) {
         logger.info("Url request from  {} {}", request.getRemoteAddr(), url);
         return new ServiceResponse<>(restService.checkURL(url));
 
