@@ -139,15 +139,7 @@ public class RestService {
         }
     }
 
-    public boolean isAccessible(String ip) {
-        try {
-            String command =  "curl ipinfo.io/" + ip;
-            JSONObject json = new JSONObject(runCommand(command));
-            return json.getString("country").equals("IR");
-        }catch (Exception e){
-            return false;
-        }
-    }
+
 
     public boolean toggleIranAccess() {
         try {
